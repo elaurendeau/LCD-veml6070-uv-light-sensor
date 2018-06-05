@@ -13,7 +13,7 @@ https://learn.adafruit.com/rgb-lcd-shield
 
 Wiring:
 https://cdn-learn.adafruit.com/assets/assets/000/032/466/medium800/force___flex_wiring.jpg
-https://i.imgur.com/aEgHt9D.png
+(https://i.imgur.com/aEgHt9D.png)
 
 Final wires:
 https://cdn.discordapp.com/attachments/265638712623235092/453404825141641216/20180604_234743.jpg
