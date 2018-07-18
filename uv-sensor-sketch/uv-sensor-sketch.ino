@@ -10,16 +10,14 @@ When a button is pressed, the backlight changes color.
 // include the library code:
 #include <Wire.h>
 #include <Adafruit_RGBLCDShield.h>
-#include <Adafruit_VEML6070.h>
-#include <utility/Adafruit_MCP23017.h>
+#include <QueueArray.h>
 
-
-// The shield uses the I2C SCL and SDA pins. On classic Arduinos
-// this is Analog 4 and 5 so you can't use those for analogRead() anymore
-// However, you can connect other I2C sensors to the I2C bus and share
-// the I2C bus.
 Adafruit_RGBLCDShield lcd = Adafruit_RGBLCDShield();
-Adafruit_VEML6070 uv = Adafruit_VEML6070();
+int lightPin = 0;  //define a pin for Photo resistor
+const String msg = "Collecting Data!";
+QueueArray <int> dataQueue;
+int total = 0;
+const int minimumDataCount = 16;
 
 // These #defines make it easy to set the backlight color
 #define RED 0x1
@@ -38,20 +36,48 @@ void setup() {
 
   // Print a message to the LCD. We track how long it takes since
   // this library has been optimized a bit and we're proud of it :)
-
-  
-  uv.begin(VEML6070_1_T);
   lcd.setBacklight(WHITE);
 }
 
 uint8_t i=0;
 void loop() {
-  lcd.clear();
-  lcd.setCursor(0,0);
-  lcd.print("UV Light level:");
+
+  int currentLightValue = analogRead(lightPin);
+  dataQueue.push(currentLightValue);
+  total += currentLightValue;
+
+// Comment these if you're not debugging via a PC.
+  Serial.print("Current value: ");// + " Total: " + total + " Count: " + dataQueue.count() + " Average: " + (total/dataQueue.count()));
+  Serial.print(currentLightValue);
+  Serial.print(" Total: ");
+  Serial.print(total);
+  Serial.print(" Count: ");
+  Serial.print(dataQueue.count());
+  Serial.print(" Average: ");
+  Serial.println(total/dataQueue.count());
   
-  lcd.setCursor(0,1);
-  lcd.print(uv.readUV());
-  delay(1000);
+  if(dataQueue.count() <= minimumDataCount) {
+    lcd.clear();
+    lcd.setCursor(0,0);
+    lcd.print(msg);
+
+    
+    for (int i = 0; i < dataQueue.count(); i++) {
+      lcd.setCursor(i,1);
+      lcd.print("*");
+    }
+  } else {
+    int dataToRemove = dataQueue.pop();
+    total -= dataToRemove;
+    
+    lcd.clear();
+    lcd.setCursor(0,0);
+    lcd.print("Avg light level:");
+  
+    lcd.setCursor(0,1);
+    lcd.print(total/dataQueue.count());
+  }
+
+  delay(750);
   
 }
